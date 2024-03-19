@@ -207,12 +207,15 @@ worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
                 // Add more cases as needed for other alignments
             }
         }
-        if(rowIndex==5){
+        if(rowIndex==4 && colIndex==1){
         console.log('-------------------------------***********------')
         console.log(rowIndex)
         console.log(colIndex)
         //console.log(cell)
         console.log('cell.style :')
+        console.log(cell)
+        //console.log(cell)
+        console.log(cell.comment)
         //console.log(cell.style)
         //console.log(cell.style.fill)
         //console.log(cell.style.fill.fgColor)

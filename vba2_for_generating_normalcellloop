@@ -1,0 +1,136 @@
+Sub MapCellsToStylesAndAlignments()
+    Dim stylesDict As Object
+    Set stylesDict = GenerateUniqueCSSStyles2()
+    
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("only_table")
+    
+    Dim cellRange As Range
+    Set cellRange = ws.Range("A1:B50")
+    
+    Dim outputList As String
+    outputList = "["
+    
+    Dim cell As Range
+    For Each cell In cellRange
+        Dim cssClass As String
+        cssClass = "htMiddle" ' Default alignment
+        
+        ' Determine horizontal alignment
+        If Not cell.HorizontalAlignment = xlGeneral Then
+            Select Case cell.HorizontalAlignment
+                Case xlCenter
+                    cssClass = cssClass & " htCenter"
+                Case xlLeft
+                    cssClass = cssClass & " htLeft"
+                Case xlRight
+                    cssClass = cssClass & " htRight"
+            End Select
+        End If
+        
+        ' Map cell's CSS string to its unique style name
+        Dim cssString As String
+        cssString = GenerateCSSForCell(cell)
+        If stylesDict.exists(cssString) Then
+            cssClass = cssClass & " " & stylesDict(cssString)
+        End If
+        
+        ' Append to output list, with each entry on a new line
+        ' Check if it's the first entry to avoid adding a comma before the first entry
+        If outputList <> "[" Then
+            outputList = outputList & ","
+        End If
+        outputList = outputList & vbCrLf & "{ row: " & cell.Row - 1 & ", col: " & cell.Column - 1 & ", className: '" & cssClass & "' }"
+    Next cell
+    
+    outputList = outputList & vbCrLf & "]"
+    
+    Debug.Print outputList
+End Sub
+
+Function GenerateUniqueCSSStyles2() As Object
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("only_table") ' Adjust the sheet reference as needed
+    
+    Dim cell As Range
+    Dim cellRange As Range
+    Set cellRange = ws.Range("A1:O21") ' Define the range you want to inspect
+    
+    Dim cssStyle As String
+    Dim uniqueStyles As Object
+    Set uniqueStyles = CreateObject("Scripting.Dictionary")
+    
+    For Each cell In cellRange
+        cssStyle = GenerateCSSForCell2(cell)
+        If cssStyle <> "" Then
+            If Not uniqueStyles.exists(cssStyle) Then
+                uniqueStyles.Add cssStyle, "custom_style_" & uniqueStyles.Count + 1
+            End If
+        End If
+    Next cell
+    
+    Set GenerateUniqueCSSStyles2 = uniqueStyles
+End Function
+
+Function GenerateCSSForCell2(cell As Range) As String
+    Dim css As String
+    css = ""
+    
+    ' Font weight
+    If cell.Font.Bold = True Then
+        css = css & "font-weight: bold !important; "
+    End If
+    
+    ' Font color
+    If cell.Font.ColorIndex <> xlNone Then
+        Dim fontColor As String
+        fontColor = RGBToHex2(cell.Font.Color)
+        css = css & "color: #" & fontColor & " !important; "
+    End If
+    
+    ' Background color
+    If cell.Interior.ColorIndex <> xlNone Then
+        Dim bgColor As String
+        bgColor = RGBToHex2(cell.Interior.Color)
+        css = css & "background-color: #" & bgColor & " !important; "
+    End If
+    
+    ' Borders
+    Dim borderSide As Variant
+    For Each borderSide In Array(xlEdgeLeft, xlEdgeTop, xlEdgeRight, xlEdgeBottom)
+        If Not cell.Borders(borderSide).LineStyle = xlLineStyleNone Then
+            Dim borderColor As String
+            borderColor = RGBToHex2(cell.Borders(borderSide).Color)
+            Dim borderWidth As String
+            borderWidth = "1px" ' Simplified to 1px; adjust based on your needs
+            Dim borderStyle As String
+            borderStyle = "solid" ' Simplified to 'solid'; adjust based on actual line style if needed
+            Select Case borderSide
+                Case xlEdgeLeft
+                    css = css & "border-left: " & borderWidth & " " & borderStyle & " #" & borderColor & " !important; "
+                Case xlEdgeTop
+                    css = css & "border-top: " & borderWidth & " " & borderStyle & " #" & borderColor & " !important; "
+                Case xlEdgeRight
+                    css = css & "border-right: " & borderWidth & " " & borderStyle & " #" & borderColor & " !important; "
+                Case xlEdgeBottom
+                    css = css & "border-bottom: " & borderWidth & " " & borderStyle & " #" & borderColor & " !important; "
+            End Select
+        End If
+    Next borderSide
+    
+    GenerateCSSForCell2 = css
+End Function
+
+'Include the RGBToHex function unchanged
+
+
+' Updated RGBToHex function to handle potential errors with automatic color indexing
+Function RGBToHex2(Color As Long) As String
+    On Error Resume Next ' In case of color indexing issues
+    Dim Red As String, Green As String, Blue As String
+    Red = Right("0" & Hex(Color Mod 256), 2)
+    Green = Right("0" & Hex(Color \ 256 Mod 256), 2)
+    Blue = Right("0" & Hex(Color \ 65536 Mod 256), 2)
+    RGBToHex2 = Blue & Green & Red
+    On Error GoTo 0 ' Turn back on error reporting
+End Function

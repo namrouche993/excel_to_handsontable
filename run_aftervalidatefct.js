@@ -1,4 +1,5 @@
 const ExcelJS = require('exceljs');
+const fs = require('fs');
 
 async function generateValidationScript(excelFilePath) {
   const workbook = new ExcelJS.Workbook();
@@ -58,6 +59,18 @@ async function generateValidationScript(excelFilePath) {
   functionStr += `}\n`;
 
   console.log(functionStr);
+
+  const outputPath = 'C:/Users/m.amrouche/Desktop/reacttableurproject/excel_to_handsontable/validationFunction_generated_automatically.js';
+  
+  // Write the generated function string to a JavaScript file
+  fs.writeFile(outputPath, functionStr, err => {
+    if (err) {
+      console.error('Error writing the file:', err);
+    } else {
+      console.log(`Validation function was successfully written to ${outputPath}`);
+    }
+  });
+
 
 
 }

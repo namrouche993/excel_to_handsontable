@@ -20,7 +20,7 @@ function afterValidatefct(isValid, oldvalue, row, prop, source, hot, userLocale,
   else if (prop == 9 || prop == 16) {
     afterValidatefct_amounts(isValid, oldvalue, row, prop, source, hot, commentsPlugin, decimalSeparator.current, userLocale.current, last_row_after_header, currencyht_nbnb, currencyht_toshow_nbnb, afterdigit_nbnb, smallafterdigit_nbnb, afterdigitsmallnb_nbnb, bignb_nbnb, smallnb_nbnb, decimalnumbers_toshow_withoutrenderer_innumbers_nbnb, usegrouping_nbnb_if_true, is_negativenb_accepted_nbnb, display_plus_sign_in_the_start, setNotification);
   }
-  else if (prop == 10 || prop == 12 || prop == 13 || prop == 14 || prop == NaN) {
+  else if (prop == 10 || prop == 12 || prop == 13 || prop == 14 || prop == 15) {
     afterValidatefct_text(isValid, oldvalue, row, prop, source, hot, commentsPlugin, text_length_txt, setNotification);
   }
   else if (prop == 11) {

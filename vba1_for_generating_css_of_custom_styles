@@ -1,9 +1,10 @@
 Sub GenerateUniqueCSSStyles()
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("only_table") ' Adjust the sheet reference as needed
+    Set ws = ThisWorkbook.Sheets("only_table") ' Adjust the sheet reference as needed!!
     
     Dim cellRange As Range
-    Set cellRange = ws.Range("A1:O21") ' Define the range you want to inspect
+    ' Use the UsedRange property to automatically select all used cells
+    Set cellRange = ws.UsedRange ' Adjusted to use all used cells
 
     Dim cell As Range
     Dim uniqueStyles As Object
@@ -12,7 +13,7 @@ Sub GenerateUniqueCSSStyles()
     Dim styleIndex As Integer
     styleIndex = 1
 
-    ' Iterate through each cell in the range
+    ' Iterate through each cell in the used range
     For Each cell In cellRange
         cssStyle = GenerateCSSForCell(cell)
         ' Check if the style is not empty and not already in uniqueStyles
@@ -23,7 +24,7 @@ Sub GenerateUniqueCSSStyles()
         End If
     Next cell
     
-    ' Output the unique CSS styles with "td." prefix
+    ' Output the unique CSS styles with "td." prefix!!
     Dim key As Variant
     For Each key In uniqueStyles.keys
         Debug.Print "td." & uniqueStyles(key) & " { " & key & " }"
@@ -89,5 +90,4 @@ Function RGBToHex(Color As Long) As String
     RGBToHex = Blue & Green & Red
     On Error GoTo 0 ' Turn back on error reporting
 End Function
-
 

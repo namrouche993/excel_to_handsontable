@@ -135,7 +135,7 @@ async function generateValidationScript(excelFilePath) {
 
   console.log(functionStr);
 
-  const outputPath = 'C:/Users/m.amrouche/Desktop/reacttableurproject/excel_to_handsontable/validationFunction_generated_automatically.js';
+  const outputPath = './output_to_use/afterValidatefct.js';
   
   // Write the generated function string to a JavaScript file
   fs.writeFile(outputPath, functionStr, err => {

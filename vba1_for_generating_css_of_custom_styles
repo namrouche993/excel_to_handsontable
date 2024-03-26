@@ -1,7 +1,7 @@
 Sub GenerateUniqueCSSStyles()
     Dim ws As Worksheet
-    Set ws = ThisWorkbook.Sheets("only_table") ' Adjust the sheet reference as needed!!
-    
+    Set ws = ThisWorkbook.Sheets("only_table") ' Adjust the sheet reference as needed!!!
+
     Dim cellRange As Range
     ' Use the UsedRange property to automatically select all used cells
     Set cellRange = ws.UsedRange ' Adjusted to use all used cells
@@ -23,13 +23,28 @@ Sub GenerateUniqueCSSStyles()
             styleIndex = styleIndex + 1
         End If
     Next cell
-    
+
+    ' Prepare to write to file
+    Dim filePath As String
+    filePath = Application.ActiveWorkbook.Path & "\output_to_use\adding_App.css" ' Adjust the path as necessary
+    Dim fileNum As Integer
+    fileNum = FreeFile
+
+    ' Open the file for writing
+    Open filePath For Output As #fileNum
+
     ' Output the unique CSS styles with "td." prefix!!
     Dim key As Variant
     For Each key In uniqueStyles.keys
-        Debug.Print "td." & uniqueStyles(key) & " { " & key & " }"
+        Print #fileNum, "td." & uniqueStyles(key) & " { " & key & " }"
     Next key
+
+    ' Close the file
+    Close #fileNum
+
+    MsgBox "CSS styles have been saved to " & filePath
 End Sub
+
 
 Function GenerateCSSForCell(cell As Range) As String
     Dim css As String
@@ -90,4 +105,5 @@ Function RGBToHex(Color As Long) As String
     RGBToHex = Blue & Green & Red
     On Error GoTo 0 ' Turn back on error reporting
 End Function
+
 

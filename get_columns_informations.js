@@ -1,4 +1,5 @@
 const ExcelJS = require('exceljs');
+const fs = require('fs');
 
 function excelWidthToPixels(excelWidth) {
   const maxDigitWidth = 7; // This is an approximate max digit width for the default Excel font (Calibri 11)
@@ -6,22 +7,13 @@ function excelWidthToPixels(excelWidth) {
   return Math.round((excelWidth * maxDigitWidth) + paddingSize);
 }
 
-function getColorClassName(color) {
-    if (!color || !color.argb) return '';
-    // Remove alpha part if it exists (first two characters)
-    const colorCode = color.argb.slice(2);
-    return `bg-${colorCode}`;
-}
 
-function getBorderStyleClassName(border) {
-    if (!border || !border.style || !border.color || !border.color.argb) return '';
-    const borderColorCode = border.color.argb.slice(2);
-    return `border-${border.style.toLowerCase()}-${borderColorCode}`;
-}
 
-async function readColumnWidths(filePath) {
+async function readColumnInformations(filePath) {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(filePath);
+  //await workbook.xlsx.readFile(filePath);
+  await workbook.readFile(filePath);
+
   const worksheet = workbook.worksheets[0]; // Assuming you want the first worksheet
   const worksheet_of_table_with_info = workbook.worksheets[2]; // Assuming you want the first worksheet
 
@@ -50,17 +42,18 @@ async function readColumnWidths(filePath) {
 
   for (let i = 1; i <= lengthRows_of_table_with_info; i++) {
     if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_start') {
-        indexRStart = i-3;
+        console.log('i in getRow is : ' + i )
+        indexRStart = i-4;
     } else if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_end_titles'){
-        indexREndTitles = i-3;
+        indexREndTitles = i-4;
     } else if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_start_headers'){
-        indexRStartHeaders = i-3;
+        indexRStartHeaders = i-4;
     } else if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_end_headers'){
-        indexREndHeaders = i-3;
+        indexREndHeaders = i-4;
     } else if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_start_cells'){
-        indexRStartCells = i-3;
+        indexRStartCells = i-4;
     } else if (worksheet_of_table_with_info.getRow(i).getCell(1).value === 'r_end_cells_displayed'){
-        indexREndCellsDisplayed = i-3;
+        indexREndCellsDisplayed = i-4;
     }
   }
   console.log(indexREndCellsDisplayed)
@@ -176,100 +169,6 @@ const Data_without_merged_cells = jsonDataWithoutMergedCells.map(rowObject => {
     return Object.keys(rowObject).sort().map(key => rowObject[key]);
 });
 
-
-worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
-    row.eachCell({ includeEmpty: true }, (cell, colIndex) => {
-        const cellAddress = cell.address;
-        let className = [];
-        className[0] = 'htMiddle '; // Default to 'htMiddle ' if no specific alignment is found
-
-        // Check if the cell is part of a merged range but not the top-left cell
-        const isMergedButNotTopLeft = mergedCellsInfo2.some(info => 
-            info.cell === cellAddress && info.cell !== info.masterCell);
-
-        if (isMergedButNotTopLeft) {
-            // Skip this cell because it's part of a merged range but not the top-left cell
-            return;
-        }
-
-        // Proceed to determine the className based on the cell's alignment
-        if (cell.style && cell.style.alignment) {
-            switch (cell.style.alignment.horizontal) {
-                case 'center':
-                    className[0] += 'htCenter ';
-                    break;
-                case 'left':
-                    className[0] += 'htLeft ';
-                    break;
-                case 'right':
-                    className[0] += 'htRight ';
-                    break;
-                // Add more cases as needed for other alignments
-            }
-        }
-        if(rowIndex==4 && colIndex==1){
-        console.log('-------------------------------***********------')
-        console.log(rowIndex)
-        console.log(colIndex)
-        //console.log(cell)
-        console.log('cell.style :')
-        console.log(cell)
-        //console.log(cell)
-        console.log(cell.comment)
-        //console.log(cell.style)
-        //console.log(cell.style.fill)
-        //console.log(cell.style.fill.fgColor)
-
-        //console.log(cell.style.border)
-        //console.log(cell.style.border.bottom)
-        console.log('-------------------------------***********------')
-    }
-
-
-
-        if (cell.style && cell.style.fill && cell.style.fill.fgColor) {
-            const colorClass = getColorClassName(cell.style.fill.fgColor);
-            if (colorClass) {
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log(colorClass)
-                className.push(colorClass);
-            }
-        }
-
-        if (cell.style && cell.style.border && cell.style.border.bottom) {
-            const borderClass = getBorderStyleClassName(cell.style.border.bottom);
-            if (borderClass) {
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log('-------------------------------***********------')
-                console.log(borderClass)
-                className.push(borderClass);
-            }
-        }
-
-
-
-        // Add the cell to cellClassMappings with its determined className
-        cellClassMappings.push({
-            row: rowIndex - 1, // ExcelJS row indices start at 1, but your example seems to be 0-based
-            col: colIndex - 1, // Same adjustment for column index
-            className: className.join(' ').trim()
-        });
-    });
-});
-
-
-
-
-
-
-
 //console.log(arrayOfArraysofData);
 
   
@@ -282,18 +181,20 @@ worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
 
     const columnInformation = worksheet_of_table_with_info.columns.map((column, index) => {
     const type_col = worksheet_of_table_with_info.getRow(2).getCell(index + 1).value;
-    const width_exact = worksheet_of_table_with_info.getRow(3).getCell(index + 1).value;
+    const aftervalidate_type = worksheet_of_table_with_info.getRow(3).getCell(index + 1).value;
+    const width_exact = worksheet_of_table_with_info.getRow(4).getCell(index + 1).value;
 
     return {
       header: column.header, // This is to identify the column, might be useful if you have headers
       width: column.width,
       width2: excelWidthToPixels(column.width),
       type_col: type_col,
+      aftervalidate_type:aftervalidate_type,
       width_exact: width_exact
     };
   });
 
-  const columnWidths = {
+  const columnInformations = {
     index_r_start: indexRStart, // The row index where "r_start" is found in the first column
     index_end_titles:indexREndTitles,
     index_start_headers:indexRStartHeaders,
@@ -302,21 +203,29 @@ worksheet.eachRow({ includeEmpty: true }, (row, rowIndex) => {
     index_end_cells_displayed:indexREndCellsDisplayed,
 
     length_rows: lengthRows,
-    //information_of_columns: columnInformation,
-    //mergedCells:mergedcells_results,
-    //Data_without_merged_cells:Data_without_merged_cells,
+    information_of_columns: columnInformation,
+    mergedCells:mergedcells_results,
+    Data_without_merged_cells:Data_without_merged_cells,
 
     last_row_after_header:last_row_after_header,
-    cellClassMappings:cellClassMappings
 
   };
 
-  console.log('columnWidths :::::::: ');
-  console.log(columnWidths);
+  console.log('columnInformations :::::::: ');
+  console.log(columnInformations);
+  const jsonInfoData = JSON.stringify(columnInformations, null, 2); // The '2' argument formats the output with 2-space indentation
 
-  //console.log('worksheet :')
-  //console.log(worksheet)
+  fs.writeFile('./output_to_use/jsonInfoData.json', jsonInfoData, 'utf8', (err) => {
+    if (err) {
+      console.error('An error occurred while writing JSON Object to File.', err);
+    } else {
+      console.log('JSON file has been saved.');
+    }
+})
+  
+
+
 }
 
 // Replace 'path/to/your/excelfile.xlsx' with the path to your actual Excel file
-readColumnWidths('example_excel.xlsx');
+readColumnInformations('example_excel_prendschargemacros122.xltm');

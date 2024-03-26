@@ -55,7 +55,7 @@ Sub WriteOutputToFile(outputText As String)
     
     ' Specify your file path here//
     Dim filePath As String
-    filePath = "C:\Users\m.amrouche\Desktop\reacttableurproject\excel_to_handsontable\output.txt"
+    filePath = "C:\Users\m.amrouche\Desktop\reacttableurproject\excel_to_handsontable\output_to_use/normalcellloop.js"
     
     Dim textFile As Object
     Set textFile = fso.CreateTextFile(filePath, True)
